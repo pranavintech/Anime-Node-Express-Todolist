@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDo List</title>
+    <link rel="stylesheet" href="/styles.css">
+    <!-- Include Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-pink-100 font-sans">
+    <div class="min-h-screen flex flex-col items-center justify-center">
+        <!-- Cute Anime Girl Illustration -->
+        <img src="/image-59-23-523x700.jpg" alt="Cute Anime Girl" class="w-32 h-32 animate-bounce mb-4">
+
+        <div class="bg-white p-4 rounded shadow-md w-full sm:w-96">
+            <h1 class="text-3xl font-semibold text-center mb-4">ToDo List</h1>
+            <div class="bg-white p-4 rounded shadow-md mb-4">
+                <h2 class="text-xl font-semibold mb-2">Tasks</h2>
+                <ul>
+                    <% tasks.forEach((task) => { %>
+                        <li class="flex items-center justify-between border-b py-2">
+                            <label class="flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    name="taskCompleted"
+                                    <%= task.completed ? 'checked' : '' %>
+                                    onchange="toggleTaskCompletion(<%= task.id %>)"
+                                    data-id="<%= task.id %>"
+                                    class="form-checkbox h-5 w-5 text-pink-600"
+                                >
+                                <span class="<%= task.completed ? 'line-through text-pink-500' : '' %>"><%= task.text %></span>
+                            </label>
+                        </li>
+                    <% }); %>
+                </ul>
+            </div>
+            <div class="bg-white p-4 rounded shadow-md">
+                <h2 class="text-xl font-semibold mb-2">Add a New Task</h2>
+                <form action="/add-task" method="POST" class="flex space-x-2">
+                    <input
+                        type="text"
+                        name="task"
+                        placeholder="Enter a new task"
+                        required
+                        class="flex-grow border rounded px-2 py-1"
+                    >
+                    <button
+                        type="submit"
+                        class="bg-pink-600 text-white rounded px-4 py-2 hover:bg-pink-800"
+                    >
+                        Add Task
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        function toggleTaskCompletion(taskId) {
+            const checkbox = document.querySelector(`input[data-id="${taskId}"]`);
+            const span = checkbox.closest('label').querySelector('span');
+            span.classList.toggle('line-through');
+            if (span.classList.contains('line-through')) {
+                span.classList.add('text-pink-500');
+            } else {
+                span.classList.remove('text-pink-500');
+            }
+
+            // Send a POST request to update task completion on the server
+            fetch(`/complete-task/${taskId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ completed: span.classList.contains('line-through') }),
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    // Handle the response data if needed
+                })
+                .catch((error) => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+        }
+    </script>
+</body>
+</html>
+
